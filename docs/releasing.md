@@ -8,6 +8,23 @@ Manual release dispatch runs its own checks before it can publish. The first
 stable release was `v1.0.0`. This guide uses `v1.2.0` as an example; complete
 the checklist before tagging each release.
 
+When the owner asks an agent to "take a release" or equivalent, that request
+authorizes release preparation, required checks, committing the release changes,
+creating the annotated version tag, and pushing `develop` and the tag. Do not
+request the same authorization again. Unresolved data-handling or breaking-change
+decisions still require the agreement described in the
+[AI breaking-change README](ai-breaking-changes.md).
+
+After tagging and verifying validation and container publication, publish the
+GitHub Release for the existing tag through an available GitHub API or CLI,
+or through the browser UI if those are unavailable and browser access permits.
+If access is unavailable, or the owner wants to publish it themselves, provide
+a release title, complete Markdown notes ready to paste into GitHub, and a link
+to create the release for that tag. Use the matching changelog section, including
+upgrade instructions, data preservation or approved migrations, and known
+limitations. Report the tag, commit, validation/publication status, and the
+published release URL or paste-ready notes.
+
 ## Version and image policy
 
 - Release tags use `vMAJOR.MINOR.PATCH`, with an optional SemVer prerelease or

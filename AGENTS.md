@@ -85,6 +85,24 @@ architecture document or a dedicated decision record and explain its impact.
 
 ## Release discipline
 
+- A request to "take a release" or equivalent authorizes the full release
+  process: prepare the version and documentation, run the required checks,
+  commit the release changes, create an annotated `vMAJOR.MINOR.PATCH` tag,
+  and push `develop` and that tag. Do not ask again for release authorization.
+  Any unresolved data-handling or breaking-change decision still follows the
+  decision discipline above.
+- Follow [the release guide](docs/releasing.md), then verify the tag's
+  validation and container publication before reporting success.
+- After tagging, publish the GitHub Release for that existing tag when access
+  permits. Prefer an available GitHub API or CLI; use the browser UI when those
+  are unavailable and browser access permits. If publication is unavailable,
+  give the owner a release title and complete Markdown notes ready to paste
+  into GitHub, with a link to create the release for the pushed tag. Honor an
+  explicit request for the owner to publish the notes themselves.
+- Base release notes on the matching `CHANGELOG.md` section, including upgrade
+  instructions, data preservation or approved migrations, and known limitations.
+  Report the tag, commit, validation/publication status, and GitHub Release URL
+  if published; otherwise include the paste-ready notes in the final response.
 - `develop` is the source branch unless the repository workflow later defines
   another release process.
 - The first release tag was `v0.1.0`; the current release tag is `v1.3.1`.
