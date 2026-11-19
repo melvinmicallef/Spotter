@@ -69,14 +69,6 @@ export function ExercisePreview({
             }}
             onClose={() => setOpen(false)}
           >
-            <button
-              className="exercise-details-modal-close exercise-preview-close"
-              type="button"
-              aria-label="Close preview"
-              onClick={() => setOpen(false)}
-            >
-              ×
-            </button>
             {media ? (
               <img
                 src={media.url}

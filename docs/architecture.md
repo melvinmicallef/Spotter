@@ -251,13 +251,15 @@ Template details, the editor, and the pre-start workout screen share an
 pre-start screen uses full-card buttons with names above target-muscle summaries
 formatted through the shared muscle-path helper. Exercise order stays unchanged.
 Tapping or clicking opens a native modal `dialog`, portalled to the document
-body, containing only the image and a close button. Native keyboard activation,
+body, containing only the image. Native keyboard activation,
 focus containment, and Escape dismissal are supported; clicking the backdrop
 also closes it and focus returns to the trigger. There is no visible heading or
 instructional text. The preview uses the existing media URL and offline media
 cache, with native GIF playback and a missing-media fallback. Selection, touch
-callouts, and context menus are suppressed on preview triggers only; normal
-touch scrolling remains available. Previewing does not change the template draft
+callouts, context menus, and browser tap highlights are suppressed on preview
+triggers only; normal touch scrolling and keyboard focus indicators remain
+available. The image-only dialog has no close button or focus outline.
+Previewing does not change the template draft
 or start a workout.
 
 ### Exercise images

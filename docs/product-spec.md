@@ -233,8 +233,10 @@ Deleting a weekly template requires explicit confirmation.
 
 In the template details and editor, tapping or clicking an exercise name opens
 an image-only demonstration modal. GIF demonstrations animate; PNG and JPEG
-demonstrations are also shown. The modal has a close button and dismisses on
-an outside click or Escape. It has no visible title or instructional text.
+demonstrations are also shown. The modal dismisses on an outside click or Escape.
+It has no close button, visible title, or instructional text. Preview triggers
+suppress the browser's tap highlight and pointer focus outline while retaining
+the visible keyboard focus indicator.
 Exercises without media show "No demonstration available." Native keyboard
 activation works, focus stays in the modal, and closing returns focus to the
 trigger. Exercise names suppress Android text selection and long-press menus;

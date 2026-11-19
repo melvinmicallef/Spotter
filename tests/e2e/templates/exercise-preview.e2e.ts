@@ -92,25 +92,20 @@ test('opens image-only previews on click in template details and editor without 
     // Pointer-down alone does not open a preview; a completed click does.
     await title.hover();
     await page.mouse.down();
+    await expect(title).toHaveCSS('outline-style', 'none');
     await expect(dialog).toHaveCount(0);
     await page.mouse.up();
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('img')).toHaveAttribute('src', media.url);
     await expect(dialog.getByRole('img')).toHaveJSProperty('naturalWidth', 1);
     await expect(dialog.getByRole('heading')).toHaveCount(0);
-    await expect(dialog).toHaveText('×');
-    await expect(
-      page.getByRole('button', { name: 'Close preview', exact: true }),
-    ).toBeFocused();
+    await expect(dialog).toHaveText('');
+    await expect(dialog.getByRole('button')).toHaveCount(0);
+    await expect(dialog).toBeFocused();
+    await expect(dialog).toHaveCSS('outline-style', 'none');
     await dialog.getByRole('img').click();
     await expect(dialog).toBeVisible();
-    await page.keyboard.press('Tab');
-    await expect(
-      dialog.getByRole('button', { name: 'Close preview', exact: true }),
-    ).toBeFocused();
-    await dialog
-      .getByRole('button', { name: 'Close preview', exact: true })
-      .click();
+    await page.keyboard.press('Escape');
     await expect(dialog).toHaveCount(0);
     await expect(title).toBeFocused();
 
@@ -121,7 +116,10 @@ test('opens image-only previews on click in template details and editor without 
     await expect(title).toBeFocused();
     // Native keyboard activation is a normal toggle, not a hold gesture.
     for (const key of ['Space', 'Enter']) {
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Shift+Tab');
       await title.focus();
+      await expect(title).toHaveCSS('outline-style', 'solid');
       await page.keyboard.press(key);
       await expect(dialog).toBeVisible();
       await page.keyboard.press('Escape');
@@ -134,9 +132,7 @@ test('opens image-only previews on click in template details and editor without 
     await expect(page.getByRole('dialog')).toContainText(
       'No demonstration available.',
     );
-    await page
-      .getByRole('button', { name: 'Close preview', exact: true })
-      .click();
+    await page.keyboard.press('Escape');
 
     if (suffix) {
       await expect(
@@ -194,10 +190,15 @@ test.describe('phone previews', () => {
       // Normal touch scrolling remains available on preview triggers.
       await expect(trigger).toHaveCSS('touch-action', 'auto');
       await expect(trigger).toHaveCSS('user-select', 'none');
+      await expect(trigger).toHaveCSS(
+        '-webkit-tap-highlight-color',
+        'rgba(0, 0, 0, 0)',
+      );
       const box = (await trigger.boundingBox())!;
       await page.touchscreen.tap(box.x + box.width - 4, box.y + box.height - 4);
       await expect(dialog).toBeVisible();
-      await expect(dialog).toHaveText('×');
+      await expect(dialog).toHaveText('');
+      await expect(dialog.getByRole('button')).toHaveCount(0);
       const preview = (await dialog.boundingBox())!;
       expect(preview.x).toBeGreaterThanOrEqual(0);
       expect(preview.x + preview.width).toBeLessThanOrEqual(390);
@@ -208,9 +209,7 @@ test.describe('phone previews', () => {
       await page.touchscreen.tap(5, 5);
       await expect(dialog).toHaveCount(0);
       await trigger.tap();
-      await dialog
-        .getByRole('button', { name: 'Close preview', exact: true })
-        .tap();
+      await page.touchscreen.tap(5, 5);
       await expect(dialog).toHaveCount(0);
       await expect(page.locator('.workout-active-page')).toHaveCount(0);
     }
@@ -275,9 +274,7 @@ test('shows workout cards below Start with muscle subheadings and image previews
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('img')).toHaveAttribute('src', media.url);
   await expect(dialog.getByRole('img')).toHaveJSProperty('naturalWidth', 1);
-  await dialog
-    .getByRole('button', { name: 'Close preview', exact: true })
-    .click();
+  await page.mouse.click(5, 5);
   await emptyCard.click();
   await expect(page.getByRole('dialog')).toContainText(
     'No demonstration available.',
@@ -349,9 +346,7 @@ test('opens and dismisses the cached template demonstration offline', async ({
   await title.click();
   const dialog = page.getByRole('dialog', { name: exercise.name, exact: true });
   await expect(dialog.getByRole('img')).toHaveJSProperty('naturalWidth', 1);
-  await dialog
-    .getByRole('button', { name: 'Close preview', exact: true })
-    .click();
+  await page.mouse.click(5, 5);
   await expect(dialog).toHaveCount(0);
   await expect(title).toBeFocused();
 });

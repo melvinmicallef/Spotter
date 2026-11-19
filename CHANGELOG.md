@@ -6,6 +6,12 @@ All notable changes to Spotter are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Exercise previews no longer show a close button; dismiss them with an outside
+  click or Escape. Preview titles and cards suppress the brief browser tap/click
+  highlight while retaining keyboard focus indicators.
+
 ## [1.4.0] - 2026-11-19
 
 ### Added
