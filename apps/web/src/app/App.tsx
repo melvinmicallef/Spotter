@@ -331,6 +331,14 @@ export function App() {
     navigatePath(pathForView(nextView));
   }
 
+  function goHome() {
+    if (view === 'workout' && !activeWorkout) {
+      setCalendarNow(new Date());
+      setDaySelection(undefined);
+    }
+    navigate('workout');
+  }
+
   async function changeStretchingPoster(file: File | null) {
     if (!navigator.onLine)
       throw new Error('Connect to the server to change the stretching poster.');
@@ -517,11 +525,7 @@ export function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <button
-          className="brand"
-          type="button"
-          onClick={() => navigate('workout')}
-        >
+        <button className="brand" type="button" onClick={goHome}>
           <img className="brand-mark" src="/spotter-runner-192.png" alt="" />
           <span>Spotter</span>
         </button>

@@ -8,16 +8,19 @@ All notable changes to Spotter are recorded here. The format follows
 
 ### Added
 
-- Hold an exercise name in template details or the template editor to preview
-  its demonstration, including animated GIFs. Release to close; exercise names
-  suppress Android text selection and long-press menus during the gesture.
+- Tap an exercise name in template details or the template editor to open an
+  image-only demonstration modal, including animated GIFs. Close it with the
+  close button, an outside click, or Escape. Exercise names suppress Android
+  text selection and long-press menus while allowing normal touch scrolling.
 
 ### Changed
 
+- Tapping the Spotter icon on the workout home screen resets the selected day
+  to today while preserving any in-progress workout.
 - Before starting a workout, scheduled exercises appear as unnumbered cards
   below the Start workout button, with target muscles beneath the name.
-  Hold anywhere on a card to preview its
-  demonstration until release, including offline when the media is cached.
+  Tap anywhere on a card to open its demonstration modal, including offline
+  when the media is cached.
 
 ## [1.3.1] - 2026-10-24
 

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { Exercise } from '@spotter/shared';
@@ -15,97 +15,78 @@ export function ExercisePreview({
   children?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const pointerId = useRef<number | null>(null);
-  const titleId = useId();
-  const descriptionId = useId();
-
-  function close() {
-    pointerId.current = null;
-    setOpen(false);
-  }
+  const trigger = useRef<HTMLButtonElement>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    if (!open) return;
-
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') close();
+    if (!open || !dialog.current) return;
+    const modal = dialog.current;
+    modal.showModal();
+    const button = trigger.current;
+    function closeOutside(event: MouseEvent) {
+      if (event.detail === 0) return;
+      const bounds = modal.getBoundingClientRect();
+      if (
+        event.clientX < bounds.left ||
+        event.clientX > bounds.right ||
+        event.clientY < bounds.top ||
+        event.clientY > bounds.bottom
+      )
+        setOpen(false);
     }
-    function closeWhenHidden() {
-      if (document.hidden) close();
-    }
-
-    window.addEventListener('blur', close);
-    window.addEventListener('keydown', closeOnEscape);
-    document.addEventListener('visibilitychange', closeWhenHidden);
+    // Backdrop clicks can target the document rather than the native dialog.
+    document.addEventListener('click', closeOutside, true);
     return () => {
-      window.removeEventListener('blur', close);
-      window.removeEventListener('keydown', closeOnEscape);
-      document.removeEventListener('visibilitychange', closeWhenHidden);
+      document.removeEventListener('click', closeOutside, true);
+      button?.focus({ preventScroll: true });
     };
   }, [open]);
 
   return (
     <>
       <button
+        ref={trigger}
         className={`exercise-preview-title ${className}`.trim()}
         type="button"
-        aria-label={`Hold to preview ${name}`}
+        aria-label={`Preview ${name}`}
         aria-haspopup="dialog"
         aria-expanded={open}
         onContextMenu={(event) => event.preventDefault()}
         onDragStart={(event) => event.preventDefault()}
-        onPointerDown={(event) => {
-          if (!event.isPrimary || event.button !== 0) return;
-          event.preventDefault();
-          event.currentTarget.focus({ preventScroll: true });
-          event.currentTarget.setPointerCapture(event.pointerId);
-          pointerId.current = event.pointerId;
-          setOpen(true);
-        }}
-        onPointerUp={(event) => {
-          if (event.pointerId === pointerId.current) close();
-        }}
-        onPointerCancel={close}
-        onLostPointerCapture={close}
-        onKeyDown={(event) => {
-          if (event.key === ' ' || event.key === 'Enter') {
-            event.preventDefault();
-            if (!event.repeat) setOpen(true);
-          }
-        }}
-        onKeyUp={(event) => {
-          if (event.key === ' ' || event.key === 'Enter') {
-            event.preventDefault();
-            close();
-          }
-        }}
-        onBlur={close}
+        onClick={() => setOpen(true)}
       >
         {children ?? name}
       </button>
       {open &&
         createPortal(
-          <div className="modal-backdrop exercise-preview-backdrop">
-            <section
-              className="exercise-preview-modal"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
-              aria-describedby={descriptionId}
+          <dialog
+            ref={dialog}
+            className="exercise-preview-modal"
+            aria-label={name}
+            onCancel={(event) => {
+              event.preventDefault();
+              setOpen(false);
+            }}
+            onClose={() => setOpen(false)}
+          >
+            <button
+              className="exercise-details-modal-close exercise-preview-close"
+              type="button"
+              aria-label="Close preview"
+              onClick={() => setOpen(false)}
             >
-              <h2 id={titleId}>{name}</h2>
-              {media ? (
-                <img
-                  src={media.url}
-                  alt={`${name} demonstration`}
-                  draggable={false}
-                />
-              ) : (
-                <p>No demonstration available.</p>
-              )}
-              <small id={descriptionId}>Release to close</small>
-            </section>
-          </div>,
+              ×
+            </button>
+            {media ? (
+              <img
+                src={media.url}
+                alt={`${name} demonstration`}
+                draggable={false}
+              />
+            ) : (
+              <p>No demonstration available.</p>
+            )}
+          </dialog>,
           document.body,
         )}
     </>

@@ -1202,7 +1202,6 @@ small {
   background: transparent;
   font-weight: inherit;
   text-align: left;
-  touch-action: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -1215,37 +1214,39 @@ small {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
-.exercise-preview-backdrop {
-  /* Keep the held pointer on its trigger while the preview is visible. */
-  pointer-events: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
 .exercise-preview-modal {
-  display: flex;
-  width: min(640px, 100%);
+  width: min(640px, calc(100% - 40px));
   max-height: calc(100vh - 40px);
   max-height: calc(100dvh - 40px);
-  flex-direction: column;
-  gap: 12px;
-  padding: 20px;
+  padding: 12px;
   border: 1px solid var(--border);
   border-radius: 18px;
+  color: var(--text);
   background: var(--surface-solid);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
 }
-.exercise-preview-modal h2,
+.exercise-preview-modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+.exercise-preview-modal::backdrop {
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(5px);
+}
+.exercise-preview-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
 .exercise-preview-modal p {
   margin: 0;
+  padding: 42px 12px 12px;
   overflow-wrap: anywhere;
 }
 .exercise-preview-modal img {
   min-height: 0;
   width: 100%;
   object-fit: contain;
-}
-.exercise-preview-modal small {
-  color: var(--text-muted);
 }
 .template-entry-heading,
 .template-day > header {

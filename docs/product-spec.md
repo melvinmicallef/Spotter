@@ -231,14 +231,15 @@ are grouped together beside the title, separate from the Active or Set active
 control. Creation and editing use dedicated, refresh-safe URLs.
 Deleting a weekly template requires explicit confirmation.
 
-In the template details and editor, pressing and holding an exercise name opens
-a demonstration preview. GIF demonstrations animate while the preview is open;
-PNG and JPEG demonstrations are also shown. Exercises without media show
-"No demonstration available." Releasing the finger, mouse button, or held
-Space/Enter key closes the preview immediately. Cancellation, Escape, or loss of
-focus also dismisses it. Exercise names suppress text selection and native
-long-press menus so Android selection controls do not interrupt the hold.
-Previously cached demonstrations remain available in the offline details view.
+In the template details and editor, tapping or clicking an exercise name opens
+an image-only demonstration modal. GIF demonstrations animate; PNG and JPEG
+demonstrations are also shown. The modal has a close button and dismisses on
+an outside click or Escape. It has no visible title or instructional text.
+Exercises without media show "No demonstration available." Native keyboard
+activation works, focus stays in the modal, and closing returns focus to the
+trigger. Exercise names suppress Android text selection and long-press menus;
+normal touch scrolling remains available. Previously cached demonstrations
+remain available in the offline details view.
 
 ### Workout tracking
 
@@ -248,12 +249,14 @@ A user can:
   template, with the current weekday selected by default;
 - before starting, see the selected day's exercises as unnumbered cards with
   the Start/Repeat workout button above the list and the exercise name above
-  a target-muscle subheading using full muscle paths. Hold
-  anywhere on a card to preview its demonstration until release, using the
+  a target-muscle subheading using full muscle paths. Tap or click
+  anywhere on a card to open its image-only demonstration modal, using the
   same behavior and Android selection suppression as template previews.
   Missing muscles or media have explicit empty messages, and cached cards
   and demonstrations remain available offline;
 - see each weekday's optional title or its Rest label and select a day directly;
+- tap the Spotter icon on the workout home screen to reset the selected day to
+  today, including rest or completed days. An in-progress workout is preserved;
 - finish a workout to mark that template day complete for the current ISO week;
 - cancel a workout after confirmation, deleting its progress without marking
   the template day complete;
