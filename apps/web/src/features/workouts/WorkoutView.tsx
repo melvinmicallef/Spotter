@@ -26,6 +26,8 @@ import {
 import { ExerciseDetailsModal } from '../catalogue/CatalogueView.js';
 import { ConfirmDialog } from '../../components/ConfirmDialog.js';
 import { ExercisePicker } from '../catalogue/ExercisePicker.js';
+import { ExercisePreview } from '../../components/ExercisePreview.js';
+import { exerciseMuscleSummary } from '../../shared/exercise-muscles.js';
 
 interface WorkoutViewProps {
   workout?: Workout;
@@ -272,46 +274,56 @@ export function WorkoutView({
                   ? `${weekdayName(selectedDay)} is a rest day.`
                   : `${scheduledExercises.length} exercise${scheduledExercises.length === 1 ? '' : 's'} scheduled for ${weekdayName(selectedDay)}.`}
               </p>
+              <button
+                className="full"
+                type="button"
+                disabled={
+                  scheduledExercises.length === 0 ||
+                  (selectedDayCompleted &&
+                    confirmedRepeatDay !== selectedDay) ||
+                  !weekProgressReady
+                }
+                onClick={() => {
+                  const repeatCompleted =
+                    selectedDayCompleted && confirmedRepeatDay === selectedDay;
+                  if (repeatCompleted) setConfirmedRepeatDay(null);
+                  onStart(activeTemplate, selectedDay, repeatCompleted);
+                }}
+              >
+                {selectedDayCompleted
+                  ? `Repeat ${weekdayName(selectedDay)}'s workout`
+                  : selectedDay === today
+                    ? "Start today's workout"
+                    : `Start ${weekdayName(selectedDay)}'s workout`}
+              </button>
               {scheduledExercises.length > 0 && (
-                <ol className="scheduled-exercise-list">
+                <ul
+                  className="scheduled-exercise-list"
+                  aria-label="Scheduled exercises"
+                >
                   {scheduledExercises.map((entry) => {
-                    const primaryMuscles =
-                      exercises
-                        .find((exercise) => exercise.id === entry.exerciseId)
-                        ?.muscles.filter((muscle) => muscle.role === 'primary')
-                        .map((muscle) => muscle.name) ?? [];
+                    const exercise = exercises.find(
+                      (exercise) => exercise.id === entry.exerciseId,
+                    );
 
                     return (
                       <li key={entry.id}>
-                        {entry.exerciseName}
-                        {primaryMuscles.length > 0 &&
-                          ` [${primaryMuscles.join(', ')}]`}
+                        <ExercisePreview
+                          className="scheduled-exercise-card"
+                          name={entry.exerciseName}
+                          media={exercise?.media}
+                        >
+                          <strong>{entry.exerciseName}</strong>
+                          <small>
+                            {exerciseMuscleSummary(exercise ?? { muscles: [] })}
+                          </small>
+                        </ExercisePreview>
                       </li>
                     );
                   })}
-                </ol>
+                </ul>
               )}
             </div>
-            <button
-              type="button"
-              disabled={
-                scheduledExercises.length === 0 ||
-                (selectedDayCompleted && confirmedRepeatDay !== selectedDay) ||
-                !weekProgressReady
-              }
-              onClick={() => {
-                const repeatCompleted =
-                  selectedDayCompleted && confirmedRepeatDay === selectedDay;
-                if (repeatCompleted) setConfirmedRepeatDay(null);
-                onStart(activeTemplate, selectedDay, repeatCompleted);
-              }}
-            >
-              {selectedDayCompleted
-                ? `Repeat ${weekdayName(selectedDay)}'s workout`
-                : selectedDay === today
-                  ? "Start today's workout"
-                  : `Start ${weekdayName(selectedDay)}'s workout`}
-            </button>
           </article>
         )}
         {completedDayToConfirm !== null && (

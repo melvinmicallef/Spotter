@@ -1195,6 +1195,58 @@ small {
   border-radius: 12px;
   background: var(--surface-soft);
 }
+.exercise-preview-title {
+  padding: 0;
+  border-radius: 3px;
+  color: inherit;
+  background: transparent;
+  font-weight: inherit;
+  text-align: left;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.exercise-preview-title:hover:not(:disabled) {
+  color: var(--accent);
+  filter: none;
+}
+.exercise-preview-title:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.exercise-preview-backdrop {
+  /* Keep the held pointer on its trigger while the preview is visible. */
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.exercise-preview-modal {
+  display: flex;
+  width: min(640px, 100%);
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-solid);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+}
+.exercise-preview-modal h2,
+.exercise-preview-modal p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.exercise-preview-modal img {
+  min-height: 0;
+  width: 100%;
+  object-fit: contain;
+}
+.exercise-preview-modal small {
+  color: var(--text-muted);
+}
 .template-entry-heading,
 .template-day > header {
   display: flex;
@@ -2033,9 +2085,26 @@ small {
 }
 .scheduled-exercise-list {
   display: grid;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+.scheduled-exercise-card {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
   gap: 6px;
-  padding-left: 24px;
-  color: var(--text-secondary);
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  background: var(--surface-soft);
+  overflow-wrap: anywhere;
+}
+.scheduled-exercise-card small {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
 }
 .day-heading-title {
   color: var(--text-muted);

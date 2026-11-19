@@ -246,6 +246,18 @@ The template catalogue is a compact list. Selecting a template opens a
 read-only weekly-plan detail page; editing and deletion are explicit actions on
 that page, and the full weekly editor is isolated on its own route.
 
+Template details, the editor, and the pre-start workout screen share an
+`ExercisePreview` component. Template pages use exercise-name buttons; the
+pre-start screen uses full-card buttons with names above target-muscle summaries
+formatted through the shared muscle-path helper. Exercise order stays unchanged.
+Pointer capture keeps release and cancellation events on the trigger while a
+non-interactive preview is portalled above the page; Space and Enter provide the
+same hold/release behavior for keyboards. The preview uses the existing media
+URL and offline media cache, with native GIF playback. Selection, touch callouts,
+and context menus are suppressed on preview triggers only. Releasing, cancelling,
+Escape, or losing focus closes the preview without changing the template draft
+or starting a workout.
+
 ### Exercise images
 
 Exercise images are uploaded as raw `image/gif`, `image/png`, or `image/jpeg`

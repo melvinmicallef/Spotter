@@ -18,6 +18,7 @@ import { ExercisePicker } from '../catalogue/ExercisePicker.js';
 import { pathForTemplate, templateRouteFromPath } from '../../shared/routes.js';
 import { swapTemplateDays } from './template-days.js';
 import { WEEKDAYS } from '../../shared/weekdays.js';
+import { ExercisePreview } from '../../components/ExercisePreview.js';
 
 interface TemplatesViewProps {
   online: boolean;
@@ -358,7 +359,11 @@ function TemplateDetails({
                   return (
                     <div className="template-detail-entry" key={entry.id}>
                       <strong>
-                        {index + 1}. {exercise?.name ?? entry.exerciseName}
+                        {index + 1}.{' '}
+                        <ExercisePreview
+                          name={exercise?.name ?? entry.exerciseName}
+                          media={exercise?.media}
+                        />
                       </strong>
                       <small>
                         {templateTargetSummary(entry, exercise, distanceUnit)}
@@ -541,7 +546,10 @@ function TemplateEditor({
                           <div className="template-entry-heading">
                             <span>
                               <strong>{dayIndex + 1}.</strong>{' '}
-                              {exercise?.name ?? 'Unavailable exercise'}
+                              <ExercisePreview
+                                name={exercise?.name ?? 'Unavailable exercise'}
+                                media={exercise?.media}
+                              />
                               <small className="type-badge">
                                 {exercise?.exerciseType ?? 'strength'}
                               </small>
