@@ -25,6 +25,14 @@ upgrade instructions, data preservation or approved migrations, and known
 limitations. Report the tag, commit, validation/publication status, and the
 published release URL or paste-ready notes.
 
+One-time exception: the next published GitHub Release after `v1.5.0` omits the
+routine "Upgrade instructions and migrations" and "Documented limitations"
+sections. Keep detailed guidance in the repository documentation, and mention
+any newly required user action briefly alongside its relevant change.
+Data-handling decisions still require prior agreement. Remove this exception
+after that release is published; all subsequent releases use the normal
+release-note requirements above.
+
 ## Version and image policy
 
 - Release tags use `vMAJOR.MINOR.PATCH`, with an optional SemVer prerelease or
@@ -73,7 +81,8 @@ Playwright browser tests before the package-write job.
 - [ ] `CHANGELOG.md` moves completed entries from `Unreleased` into a dated
       `[VERSION]` section and contains user-facing upgrade notes.
 - [ ] Database changes include tested forward migrations. If there are no
-      database changes, the release notes state that the current data is kept.
+      database changes, the release notes state that the current data is kept,
+      except when the one-time release-note exception above applies.
 
 ### Automated and manual verification
 
@@ -111,7 +120,9 @@ Playwright browser tests before the package-write job.
       catalogue data, and workout history against a disposable or backed-up
       volume.
 - [ ] Create GitHub release notes from the matching `CHANGELOG.md` section,
-      including known limitations and upgrade or migration instructions.
+      including known limitations and upgrade or migration instructions, except
+      when the one-time release-note exception above applies. Remove the
+      exception after its release is published.
 - [ ] Confirm prereleases did not move `latest`; confirm stable releases
       published the expected exact, minor, and `latest` tags.
 

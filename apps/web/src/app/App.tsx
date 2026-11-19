@@ -88,6 +88,7 @@ export function App() {
   const [syncErrorDetails, setSyncErrorDetails] = useState<unknown>();
   const [retryAfterMs, setRetryAfterMs] = useState<number | null>(null);
   const [message, setToastMessage] = useState<{ text: string } | null>(null);
+  const [showExitPrompt, setShowExitPrompt] = useState(false);
   const setMessage = useCallback((text: string | null) => {
     setToastMessage(text === null ? null : { text });
   }, []);
@@ -165,6 +166,8 @@ export function App() {
       window.scrollTo({ top: 0 });
     });
   }, []);
+
+  useEffect(() => appNavigation().subscribeToExitPrompt(setShowExitPrompt), []);
 
   useEffect(() => {
     if (!activeTemplate) return;
@@ -548,18 +551,24 @@ export function App() {
         </div>
       </header>
 
-      {message && (
-        <div className="toast" role="alert">
-          <span>{message.text}</span>
-          <button
-            className="icon-button"
-            type="button"
-            aria-label="Dismiss message"
-            onClick={() => setMessage(null)}
-          >
-            ×
-          </button>
+      {showExitPrompt ? (
+        <div className="toast" role="status">
+          <span>Press back again to exit.</span>
         </div>
+      ) : (
+        message && (
+          <div className="toast" role="alert">
+            <span>{message.text}</span>
+            <button
+              className="icon-button"
+              type="button"
+              aria-label="Dismiss message"
+              onClick={() => setMessage(null)}
+            >
+              ×
+            </button>
+          </div>
+        )
       )}
 
       <main>

@@ -120,8 +120,11 @@ On first adoption, browsers exposing Navigation API same-document entries also
 replace the old chronological tab trail from its first same-document entry;
 earlier documents are untouched. Older browsers establish the new hierarchy
 from the current entry and may retain pre-update entries before that root.
-Native Back at Workout is not intercepted: the browser/OS handles leaving the
-app; no script tries to close a browser window. Express and the service-worker
+The Workout root has one extra same-document entry. Back steps to the entry
+behind it and displays the exit prompt. A second Back from there is handled by
+the browser or OS. After three seconds, the app moves forward to the existing
+Workout entry to restore the prompt for the next Back. Browsers can skip these
+entries before the user interacts with the app. Express and the service-worker
 navigation fallback both return the PWA shell for direct loads and refreshes.
 
 Shared guide, picker, confirmation, and day-swap dialogs register a temporary

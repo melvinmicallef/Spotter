@@ -271,12 +271,16 @@ A user can:
   a target-muscle subheading using full muscle paths. Tap or click
   anywhere on a card to open the same exercise guide used during a workout,
   with the same behavior and Android selection suppression as template previews.
+  Closing the guide restores focus without a lingering green hover color.
   Missing muscles have an explicit empty message; exercises without media still
   show their guide text. Cached cards, guides, and demonstrations remain available
   offline;
 - see each weekday's optional title or its Rest label and select a day directly;
 - tap the Spotter icon on the workout home screen to reset the selected day to
   today, including rest or completed days. An in-progress workout is preserved;
+- press Back at the Workout root to see “Press back again to exit.” Pressing
+  Back again within three seconds lets the browser or device leave the app.
+  Open dialogs close first;
 - finish a workout to mark that template day complete for the current ISO week;
 - cancel a workout after confirmation, deleting its progress without marking
   the template day complete;

@@ -227,6 +227,9 @@ test.describe('phone previews', () => {
         '-webkit-tap-highlight-color',
         'rgba(0, 0, 0, 0)',
       );
+      const originalColor = await trigger.evaluate(
+        (button) => getComputedStyle(button).color,
+      );
       const box = (await trigger.boundingBox())!;
       await page.touchscreen.tap(box.x + box.width - 4, box.y + box.height - 4);
       await expect(dialog).toBeVisible();
@@ -248,11 +251,18 @@ test.describe('phone previews', () => {
       await expect(dialog).toBeVisible();
       await page.touchscreen.tap(5, 5);
       await expect(dialog).toHaveCount(0);
+      if (route === '/workout')
+        await expect(trigger).toHaveCSS('color', originalColor);
       await trigger.tap();
       await dialog
         .getByRole('button', { name: 'Close exercise details' })
         .tap();
       await expect(dialog).toHaveCount(0);
+      if (route === '/workout') {
+        await expect(trigger).toBeFocused();
+        await expect(trigger).toHaveCSS('outline-style', 'none');
+        await expect(trigger).toHaveCSS('color', originalColor);
+      }
       await expect(page.locator('.workout-active-page')).toHaveCount(0);
     }
     await page.getByRole('button', { name: /^Start .*workout$/ }).click();
@@ -333,6 +343,9 @@ test('shows workout cards below Start with muscle subheadings and exercise guide
     ).toBeLessThanOrEqual(width);
   }
   const dialog = page.getByRole('dialog', { name: exercise.name, exact: true });
+  const originalColor = await card.evaluate(
+    (button) => getComputedStyle(button).color,
+  );
   await card.click();
   await expect(dialog).toBeVisible();
   await expect(
@@ -348,7 +361,11 @@ test('shows workout cards below Start with muscle subheadings and exercise guide
     }),
   ).toHaveJSProperty('naturalWidth', 1);
   await expect(dialog).toContainText('Press with control.');
-  await page.mouse.click(25, 5);
+  // Back closes the guide while the mouse is still over the card.
+  await page.goBack();
+  await expect(dialog).toHaveCount(0);
+  await expect(card).toBeFocused();
+  await expect(card).toHaveCSS('color', originalColor);
   await emptyCard.click();
   await expect(page.getByRole('dialog')).toContainText('Press with control.');
   await page.keyboard.press('Escape');

@@ -128,6 +128,12 @@ architecture document or a dedicated decision record and explain its impact.
   instructions, data preservation or approved migrations, and known limitations.
   Report the tag, commit, validation/publication status, and GitHub Release URL
   if published; otherwise include the paste-ready notes in the final response.
+- One-time exception: for the next published GitHub Release after `v1.5.0` only,
+  omit the routine "Upgrade instructions and migrations" and "Documented
+  limitations" sections. Mention any newly required user action briefly with
+  its relevant change; data-handling approval requirements still apply.
+  Remove this exception after that release is published. Subsequent releases
+  return to the normal release-note requirements above.
 - `develop` is the source branch unless the repository workflow later defines
   another release process.
 - The first release tag was `v0.1.0`; the current release tag is `v1.5.0`.

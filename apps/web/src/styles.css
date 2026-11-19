@@ -1227,8 +1227,10 @@ small {
   user-select: none;
   -webkit-touch-callout: none;
 }
-.exercise-preview-title:hover:not(:disabled) {
+.exercise-preview-title:hover:not(.scheduled-exercise-card, :disabled) {
   color: var(--accent);
+}
+.exercise-preview-title:hover:not(:disabled) {
   filter: none;
 }
 .template-entry-heading,

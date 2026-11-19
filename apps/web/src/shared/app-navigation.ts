@@ -3,10 +3,21 @@ import { routeHierarchy } from './routes.js';
 interface Frame {
   path: string;
   overlayId?: string;
+  exitBoundary?: true;
 }
 interface Overlay {
   id: string;
   close: () => void;
+}
+
+const EXIT_PROMPT_MS = 3000;
+const workoutExitBoundary: Frame = { path: '/workout', exitBoundary: true };
+
+function screenFrames(path: string): Frame[] {
+  return [
+    workoutExitBoundary,
+    ...routeHierarchy(path).map((path) => ({ path })),
+  ];
 }
 
 function framesFromState(state: unknown): Frame[] | undefined {
@@ -26,6 +37,7 @@ function framesFromState(state: unknown): Frame[] | undefined {
       (frame: Frame) =>
         frame &&
         typeof frame.path === 'string' &&
+        (frame.exitBoundary === undefined || frame.exitBoundary === true) &&
         (frame.overlayId === undefined || typeof frame.overlayId === 'string'),
     )
   )
@@ -41,19 +53,26 @@ export class AppNavigation {
   private initializing = false;
   private overlays: Overlay[] = [];
   private listeners = new Set<(path: string) => void>();
+  private exitPromptListeners = new Set<(visible: boolean) => void>();
+  private exitPromptTimer: number | undefined;
   private path: string;
   private publishedPath: string;
 
   constructor(private readonly browser: Window) {
-    const paths = routeHierarchy(browser.location.pathname);
-    this.path = paths.at(-1)!;
+    const target = screenFrames(browser.location.pathname);
+    this.path = target.at(-1)!.path;
     this.publishedPath = this.path;
     const saved = framesFromState(browser.history.state);
     browser.addEventListener('popstate', this.onPopState);
+    browser.addEventListener('pagehide', () => this.clearExitPrompt());
+    browser.addEventListener('pageshow', (event) => {
+      if (event.persisted && this.frames.at(-1)?.exitBoundary)
+        this.restoreWorkoutEntry();
+    });
     if (saved && saved.at(-1)?.path === browser.location.pathname) {
       this.frames = saved;
     } else {
-      this.frames = [{ path: '/workout' }];
+      this.frames = [workoutExitBoundary];
       // When updating an already-open app, replace its old same-document tab
       // trail from its first entry. Never traverse into another document.
       const current = browser.navigation?.currentEntry;
@@ -63,20 +82,16 @@ export class AppNavigation {
       if (current && first && first.index < current.index) {
         this.initializing = true;
         this.traversing = true;
-        this.goal = paths.map((path) => ({ path }));
+        this.goal = target;
         browser.history.go(first.index - current.index);
         return;
       }
-      // Deep links get their logical parents too. Keep the entry before Spotter
-      // untouched so Back at Workout belongs to the browser/operating system.
+      // Keep the entry before Spotter untouched so the browser can leave from
+      // the exit boundary. Reconciliation also adds parents for deep links.
       this.write('replaceState');
-      for (const path of paths.slice(1)) {
-        this.frames.push({ path });
-        this.write('pushState');
-      }
     }
     // A reload restores the route, not a stale dialog entry.
-    this.request(paths.map((path) => ({ path })));
+    this.request(target);
   }
 
   subscribe(listener: (path: string) => void) {
@@ -86,13 +101,21 @@ export class AppNavigation {
     };
   }
 
+  subscribeToExitPrompt(listener: (visible: boolean) => void) {
+    this.exitPromptListeners.add(listener);
+    listener(this.exitPromptTimer !== undefined);
+    return () => {
+      this.exitPromptListeners.delete(listener);
+    };
+  }
+
   navigate(path: string) {
-    const paths = routeHierarchy(path);
-    this.path = paths.at(-1)!;
+    const target = screenFrames(path);
+    this.path = target.at(-1)!.path;
     const previous = this.overlays;
     this.overlays = [];
     for (const overlay of [...previous].reverse()) overlay.close();
-    this.request(paths.map((path) => ({ path })));
+    this.request(target);
   }
 
   openOverlay(close: () => void) {
@@ -108,7 +131,7 @@ export class AppNavigation {
 
   private updateOverlays() {
     this.request([
-      ...routeHierarchy(this.path).map((path) => ({ path })),
+      ...screenFrames(this.path),
       ...this.overlays.map((overlay) => ({
         path: this.path,
         overlayId: overlay.id,
@@ -117,6 +140,7 @@ export class AppNavigation {
   }
 
   private request(frames: Frame[]) {
+    this.clearExitPrompt();
     this.goal = frames;
     if (!this.traversing) this.reconcile();
   }
@@ -128,6 +152,7 @@ export class AppNavigation {
       common < this.frames.length &&
       common < target.length &&
       this.frames[common]!.path === target[common]!.path &&
+      this.frames[common]!.exitBoundary === target[common]!.exitBoundary &&
       this.frames[common]!.overlayId === target[common]!.overlayId
     )
       common += 1;
@@ -167,6 +192,19 @@ export class AppNavigation {
     for (const listener of this.listeners) listener(this.path);
   }
 
+  private restoreWorkoutEntry = () => {
+    // Reuse the existing Workout entry. Pushing after a native Back can make
+    // browsers skip app history and would also discard any Forward routes.
+    this.browser.history.forward();
+  };
+
+  private clearExitPrompt() {
+    if (this.exitPromptTimer === undefined) return;
+    this.browser.clearTimeout(this.exitPromptTimer);
+    this.exitPromptTimer = undefined;
+    for (const listener of this.exitPromptListeners) listener(false);
+  }
+
   private onPopState = (event: PopStateEvent) => {
     if (this.initializing) {
       this.initializing = false;
@@ -177,11 +215,25 @@ export class AppNavigation {
     }
     const frames = framesFromState(event.state);
     if (!frames) return;
+    const previous = this.frames;
     this.frames = frames;
     if (this.traversing) {
       this.traversing = false;
       this.reconcile();
       return;
+    }
+    this.clearExitPrompt();
+    if (
+      frames.at(-1)?.exitBoundary &&
+      previous.length === 2 &&
+      previous[0]?.exitBoundary
+    ) {
+      // Stay on the boundary briefly so a second native Back can leave Spotter.
+      this.exitPromptTimer = this.browser.setTimeout(
+        this.restoreWorkoutEntry,
+        EXIT_PROMPT_MS,
+      );
+      for (const listener of this.exitPromptListeners) listener(true);
     }
     const active = new Set(frames.map((frame) => frame.overlayId));
     const closed = this.overlays.filter((overlay) => !active.has(overlay.id));

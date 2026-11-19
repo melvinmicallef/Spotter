@@ -54,9 +54,10 @@ async function backTo(page: Page, path: string) {
   ).toBeVisible();
 }
 
-test('main tabs go Back to Workout and root Back leaves Spotter instead of revisiting tabs', async ({
+test('main tabs go Back to Workout and exiting requires a second Back within three seconds', async ({
   page,
 }) => {
+  await page.clock.install();
   await page.route('https://outside.example.test/', (route) =>
     route.fulfill({
       contentType: 'text/html',
@@ -88,6 +89,21 @@ test('main tabs go Back to Workout and root Back leaves Spotter instead of revis
   await expect(
     page.getByRole('navigation', { name: 'Primary navigation' }),
   ).toBeVisible();
+  const prompt = page.getByText('Press back again to exit.', { exact: true });
+  const historyLength = await page.evaluate(() => history.length);
+  await backTo(page, '/workout');
+  await expect(prompt).toBeVisible();
+  await page.clock.runFor(3100);
+  await expect(prompt).toHaveCount(0);
+  expect(await page.evaluate(() => history.length)).toBe(historyLength);
+  await backTo(page, '/workout');
+  await expect(prompt).toBeVisible();
+  await tab(page, 'History');
+  await expect(prompt).toHaveCount(0);
+  await backTo(page, '/workout');
+  await expect(prompt).toHaveCount(0);
+  await backTo(page, '/workout');
+  await expect(prompt).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL('https://outside.example.test/');
   await expect(page.getByText('Outside Spotter')).toBeVisible();
@@ -116,6 +132,8 @@ test('replaces an old same-document tab trail without touching the page before S
     page.getByRole('heading', { name: 'History', exact: true }),
   ).toBeVisible();
   await backTo(page, '/workout');
+  await backTo(page, '/workout');
+  await expect(page.getByText('Press back again to exit.')).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL('https://outside.example.test/');
 });
@@ -200,6 +218,18 @@ test('Back closes dialogs first and preserves an active workout through offline 
   await expect(page.getByRole('dialog')).toContainText('Set up for the press.');
   await backTo(page, '/workout');
   await expect(page.getByRole('dialog')).toHaveCount(0);
+  const exitPrompt = page.getByText('Press back again to exit.');
+  await expect(exitPrompt).toHaveCount(0);
+  await backTo(page, '/workout');
+  await expect(exitPrompt).toBeVisible();
+  await page
+    .getByRole('button', { name: `Preview ${exercise.name}`, exact: true })
+    .click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(exitPrompt).toHaveCount(0);
+  await backTo(page, '/workout');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(exitPrompt).toHaveCount(0);
   await page
     .getByRole('button', { name: "Start today's workout", exact: true })
     .click();
