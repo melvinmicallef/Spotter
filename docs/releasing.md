@@ -56,6 +56,11 @@ Playwright browser tests before the package-write job.
 
 ### Scope and documentation
 
+- [ ] Review staged files, commit author/committer identity, release title/body,
+      screenshots, attachments, and build artifacts for private information under
+      [the public-information rule](../AGENTS.md#public-information-and-privacy).
+      Use a verified GitHub noreply identity and portable paths; omit personal
+      data, local machine details, credentials, private URLs, and raw logs.
 - [ ] Any migration, deletion, or incompatible change has an owner-agreed
       data-handling and target-release decision recorded according to the
       [AI breaking-change README](ai-breaking-changes.md). Unresolved decisions

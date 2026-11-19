@@ -25,6 +25,31 @@ it whenever an implementation decision changes the documented behavior.
 - The first release was `0.1.0`; the current release is `1.4.0`.
 - The production image will be `ghcr.io/melvinmicallef/spotter`.
 
+## Public information and privacy
+
+- This repository and its releases are public. Treat committed files, commit
+  messages and author/committer metadata, release notes, attachments, screenshots,
+  build artifacts, and container contents as public information.
+- Before committing, pushing, or publishing, review the complete staged diff,
+  new and generated files, commit identity, and final release content for private
+  information. Include only information needed for public product documentation,
+  source code, and reproducible verification.
+- Never include secrets, credentials, tokens, keys, real environment files,
+  production databases or backups, personal workout data, private contact
+  details, private conversations, or account/session details. Do not publish
+  machine-specific home paths, local usernames, hostnames, internal addresses,
+  private URLs, or unredacted logs. Public repository identifiers, public URLs,
+  commit hashes, image digests, and clearly synthetic examples are appropriate.
+- Use repository-relative paths, generic placeholders, and synthetic test data.
+  Summarize checks instead of copying raw terminal output or browser context.
+  Use a verified GitHub noreply identity for author and committer metadata rather
+  than a personal email address; check the effective identity before committing.
+- Permission to commit or release does not authorize disclosing private context.
+  Previously committed information is not automatically safe to repeat. Sanitize
+  routine documentation without asking again; if private information is already
+  published, notify the owner. Rewriting public history, force-pushing, or moving
+  existing release tags requires an explicit, agreed remediation plan.
+
 ## Non-negotiable initial constraints
 
 - Use React and TypeScript for an installable PWA.
