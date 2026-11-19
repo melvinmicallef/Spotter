@@ -36,6 +36,33 @@ export function pathForView(view: View): string {
   return VIEW_PATHS[view];
 }
 
+/** Logical parents, independent of the tabs previously visited. */
+export function routeHierarchy(pathname: string): string[] {
+  const view = viewFromPath(pathname);
+  const paths = ['/workout'];
+  if (view === 'workout') return paths;
+  paths.push(pathForView(view));
+  if (view === 'exercises') {
+    const route = exerciseRouteFromPath(pathname);
+    if (route.kind === 'edit')
+      paths.push(
+        pathForExercise({ kind: 'details', exerciseId: route.exerciseId }),
+      );
+    if (route.kind !== 'list') paths.push(pathForExercise(route));
+  } else if (view === 'templates') {
+    const route = templateRouteFromPath(pathname);
+    if (route.kind === 'edit')
+      paths.push(
+        pathForTemplate({ kind: 'details', templateId: route.templateId }),
+      );
+    if (route.kind !== 'list') paths.push(pathForTemplate(route));
+  } else if (view === 'history') {
+    const route = historyRouteFromPath(pathname);
+    if (route.kind !== 'list') paths.push(pathForHistory(route));
+  }
+  return paths;
+}
+
 export function viewFromPath(pathname: string): View {
   const normalized = normalizePath(pathname);
   if (normalized.startsWith('/exercises/')) return 'exercises';

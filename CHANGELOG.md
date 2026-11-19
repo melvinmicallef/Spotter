@@ -6,11 +6,43 @@ All notable changes to Spotter are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-19
+
 ### Changed
 
-- Exercise previews no longer show a close button; dismiss them with an outside
-  click or Escape. Preview titles and cards suppress the brief browser tap/click
-  highlight while retaining keyboard focus indicators.
+- Back now follows the app screen hierarchy: main tabs return to Workout,
+  details and editors return to their parent screen, and open dialogs close
+  first. Switching tabs no longer creates a chronological Back trail. Back
+  at Workout is left to the phone/browser to exit or leave the app.
+- Template exercise titles and pre-start workout cards now open the same full
+  exercise guide used during a workout, including instructions, comments, muscles,
+  and its existing × close button. Outside clicks and Escape also dismiss it.
+- Suppress the browser’s blue tap highlight throughout the app, including
+  exercise removal buttons. Buttons and links keep themed keyboard focus
+  indicators without showing a pointer focus outline.
+- Add space above the active workout’s Add exercise button.
+- Toast messages dismiss automatically after ten seconds, with a fresh timer
+  for each message, and are horizontally centered on phones in portrait view.
+  The close button still dismisses them immediately.
+
+### Upgrade notes
+
+Upgrading from `1.4.0` preserves all data and adds no SQLite or IndexedDB
+migration, API change, or dependency change. Keep `/data` and browser site data,
+including pending offline synchronization. Reopen the PWA online and accept the
+update. Back navigation changes only browser navigation state; it does not
+cancel or finish an active workout. Installations crossing `1.2.0` still apply
+its previously approved secondary-muscle cleanup; follow the operations guide.
+
+### Known limitations
+
+Actual app closing at Workout is controlled by the phone/browser. Browsers with
+Navigation API support also replace an existing same-document tab trail; older
+browsers may retain pre-update history before the new Workout root. Physical
+Android system-exit behavior has not been verified on a device; browser Back,
+phone-sized touch interaction, reloads, and offline recovery are covered.
+The deployment remains trusted and single-user. Dependencies are unchanged;
+the existing Zod and body-parser advisories remain listed under `1.3.0`.
 
 ## [1.4.0] - 2026-11-19
 

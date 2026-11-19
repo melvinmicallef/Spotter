@@ -1,3 +1,4 @@
+import { useBackDismiss } from '../../shared/use-back-dismiss.js';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import type {
@@ -362,7 +363,7 @@ function TemplateDetails({
                         {index + 1}.{' '}
                         <ExercisePreview
                           name={exercise?.name ?? entry.exerciseName}
-                          media={exercise?.media}
+                          exercise={exercise}
                         />
                       </strong>
                       <small>
@@ -548,7 +549,7 @@ function TemplateEditor({
                               <strong>{dayIndex + 1}.</strong>{' '}
                               <ExercisePreview
                                 name={exercise?.name ?? 'Unavailable exercise'}
-                                media={exercise?.media}
+                                exercise={exercise}
                               />
                               <small className="type-badge">
                                 {exercise?.exerciseType ?? 'strength'}
@@ -806,6 +807,7 @@ function SwapDaysDialog({
   onClose: () => void;
   onSwap: (firstDay: DayOfWeek, secondDay: DayOfWeek) => void;
 }) {
+  useBackDismiss(onClose);
   const [firstDay, setFirstDay] = useState<DayOfWeek | ''>('');
   const [secondDay, setSecondDay] = useState<DayOfWeek | ''>('');
 

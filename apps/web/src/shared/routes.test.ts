@@ -5,11 +5,52 @@ import {
   pathForExercise,
   pathForTemplate,
   pathForView,
+  routeHierarchy,
   templateRouteFromPath,
   viewFromPath,
 } from './routes.js';
 
 const exerciseId = '6ad8cf18-123c-43ed-a36c-3b87862ef23a';
+
+describe('app screen hierarchy', () => {
+  const cases: [string, string[]][] = [
+    ['/', ['/workout']],
+    ['/unknown', ['/workout']],
+    ['/workout', ['/workout']],
+    ...[
+      'history',
+      'muscles',
+      'settings',
+      'stretching',
+      'exercises',
+      'templates',
+    ].map<[string, string[]]>((view) => [`/${view}`, ['/workout', `/${view}`]]),
+    ...['exercises', 'templates'].flatMap<[string, string[]]>((view) => [
+      [`/${view}/new`, ['/workout', `/${view}`, `/${view}/new`]],
+      [
+        `/${view}/${exerciseId}`,
+        ['/workout', `/${view}`, `/${view}/${exerciseId}`],
+      ],
+      [
+        `/${view}/${exerciseId}/edit`,
+        [
+          '/workout',
+          `/${view}`,
+          `/${view}/${exerciseId}`,
+          `/${view}/${exerciseId}/edit`,
+        ],
+      ],
+    ]),
+    [
+      `/history/${exerciseId}`,
+      ['/workout', '/history', `/history/${exerciseId}`],
+    ],
+  ];
+  it.each(cases)('defines fixed parents for %s', (path, parents) => {
+    expect(routeHierarchy(path)).toEqual(parents);
+    expect(routeHierarchy(`${path}/`)).toEqual(parents);
+  });
+});
 
 describe('top-level routes', () => {
   it.each([

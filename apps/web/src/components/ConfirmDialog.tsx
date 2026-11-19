@@ -1,3 +1,4 @@
+import { useBackDismiss } from '../shared/use-back-dismiss.js';
 import { useEffect } from 'react';
 
 interface ConfirmDialogProps {
@@ -21,6 +22,7 @@ export function ConfirmDialog({
   cancelLabel = 'Cancel',
   closeLabel = 'Cancel deletion',
 }: ConfirmDialogProps) {
+  useBackDismiss(onCancel);
   useEffect(() => {
     function closeOnEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') onCancel();

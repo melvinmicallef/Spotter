@@ -1,3 +1,4 @@
+import { useBackDismiss } from '../../shared/use-back-dismiss.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Exercise } from '@spotter/shared';
@@ -21,6 +22,7 @@ export function ExercisePicker({
   onClose: () => void;
   selectionMode?: 'single' | 'multiple';
 }) {
+  useBackDismiss(onClose);
   const selectionMade = useRef(false);
   const [nameFilter, setNameFilter] = useState('');
   const [muscleFilter, setMuscleFilter] = useState('');

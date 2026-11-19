@@ -22,7 +22,7 @@ it whenever an implementation decision changes the documented behavior.
 - The project contains a working application with an npm workspace,
   React PWA, Express API, SQLite persistence, IndexedDB outbox, Docker image,
   and GitHub Actions workflows.
-- The first release was `0.1.0`; the current release is `1.4.0`.
+- The first release was `0.1.0`; the current release is `1.5.0`.
 - The production image will be `ghcr.io/melvinmicallef/spotter`.
 
 ## Public information and privacy
@@ -130,7 +130,7 @@ architecture document or a dedicated decision record and explain its impact.
   if published; otherwise include the paste-ready notes in the final response.
 - `develop` is the source branch unless the repository workflow later defines
   another release process.
-- The first release tag was `v0.1.0`; the current release tag is `v1.4.0`.
+- The first release tag was `v0.1.0`; the current release tag is `v1.5.0`.
 - Stable release tags may update `latest`; prerelease tags must not.
 - A manual image build uses an explicit image tag or a unique `sha-<commit>` tag.
 - A pushed release tag must pass the `Validate` workflow before its dependent

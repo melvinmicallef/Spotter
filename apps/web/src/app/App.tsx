@@ -21,6 +21,7 @@ import { TemplatesView } from '../features/templates/TemplatesView.js';
 import { WorkoutView } from '../features/workouts/WorkoutView.js';
 import { localRepository } from '../features/offline/db.js';
 import { pathForView, viewFromPath, type View } from '../shared/routes.js';
+import { appNavigation } from '../shared/app-navigation.js';
 import {
   isoWeekKey,
   nextAvailableDay,
@@ -86,7 +87,10 @@ export function App() {
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncErrorDetails, setSyncErrorDetails] = useState<unknown>();
   const [retryAfterMs, setRetryAfterMs] = useState<number | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setToastMessage] = useState<{ text: string } | null>(null);
+  const setMessage = useCallback((text: string | null) => {
+    setToastMessage(text === null ? null : { text });
+  }, []);
   const [ready, setReady] = useState(false);
   const activeWorkoutRef = useRef<Workout | undefined>(undefined);
   const saveQueueRef = useRef(Promise.resolve());
@@ -123,6 +127,11 @@ export function App() {
   }, [localWorkouts, serverWorkouts]);
   useEffect(() => applyTheme(theme), [theme]);
   useEffect(() => {
+    if (!message) return;
+    const timeout = window.setTimeout(() => setToastMessage(null), 10_000);
+    return () => window.clearTimeout(timeout);
+  }, [message]);
+  useEffect(() => {
     const nextMidnight = new Date();
     nextMidnight.setHours(24, 0, 0, 25);
     const timeout = window.setTimeout(
@@ -151,9 +160,10 @@ export function App() {
   );
 
   useEffect(() => {
-    const restorePath = () => setPathname(window.location.pathname);
-    window.addEventListener('popstate', restorePath);
-    return () => window.removeEventListener('popstate', restorePath);
+    return appNavigation().subscribe((path) => {
+      setPathname(path);
+      window.scrollTo({ top: 0 });
+    });
   }, []);
 
   useEffect(() => {
@@ -321,10 +331,7 @@ export function App() {
   }
 
   function navigatePath(nextPath: string) {
-    if (window.location.pathname !== nextPath)
-      window.history.pushState(null, '', nextPath);
-    setPathname(nextPath);
-    window.scrollTo({ top: 0 });
+    appNavigation().navigate(nextPath);
   }
 
   function navigate(nextView: View) {
@@ -543,7 +550,7 @@ export function App() {
 
       {message && (
         <div className="toast" role="alert">
-          <span>{message}</span>
+          <span>{message.text}</span>
           <button
             className="icon-button"
             type="button"

@@ -35,6 +35,10 @@ async function createPlan(request: APIRequestContext, isActive = false) {
       data: {
         name,
         exerciseType: 'strength',
+        preparation: 'Set up the bench.',
+        execution: 'Press with control.',
+        comments: 'Keep a steady tempo.',
+        referenceUrl: 'https://example.com/exercise',
         mediaId,
         muscles: mediaId ? [{ muscleId: target.id, role: 'primary' }] : [],
       },
@@ -64,7 +68,7 @@ async function createPlan(request: APIRequestContext, isActive = false) {
   return { template, exercise, noMedia, media };
 }
 
-test('opens image-only previews on click in template details and editor without saving', async ({
+test('opens the shared exercise guide on click in template details and editor without saving', async ({
   page,
   request,
 }) => {
@@ -96,22 +100,47 @@ test('opens image-only previews on click in template details and editor without 
     await expect(dialog).toHaveCount(0);
     await page.mouse.up();
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole('img')).toHaveAttribute('src', media.url);
-    await expect(dialog.getByRole('img')).toHaveJSProperty('naturalWidth', 1);
-    await expect(dialog.getByRole('heading')).toHaveCount(0);
-    await expect(dialog).toHaveText('');
-    await expect(dialog.getByRole('button')).toHaveCount(0);
-    await expect(dialog).toBeFocused();
-    await expect(dialog).toHaveCSS('outline-style', 'none');
-    await dialog.getByRole('img').click();
+    await expect(
+      dialog.getByRole('img', {
+        name: `${exercise.name} demonstration`,
+        exact: true,
+      }),
+    ).toHaveAttribute('src', media.url);
+    await expect(
+      dialog.getByRole('img', {
+        name: `${exercise.name} demonstration`,
+        exact: true,
+      }),
+    ).toHaveJSProperty('naturalWidth', 1);
+    await expect(
+      dialog.getByRole('heading', { name: exercise.name, exact: true }),
+    ).toBeVisible();
+    await expect(dialog).toContainText('Set up the bench.');
+    await expect(dialog).toContainText('Press with control.');
+    await expect(dialog).toContainText('Keep a steady tempo.');
+    await expect(dialog).toContainText('Shoulders › Deltoid › Anterior');
+    await expect(dialog.getByRole('link')).toHaveCount(0);
+    const close = dialog.getByRole('button', {
+      name: 'Close exercise details',
+    });
+    await expect(close).toHaveText('×');
+    await expect(close).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(close).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(close).toBeFocused();
+    await dialog
+      .getByRole('img', { name: `${exercise.name} demonstration`, exact: true })
+      .click();
     await expect(dialog).toBeVisible();
-    await page.keyboard.press('Escape');
+    await close.click();
     await expect(dialog).toHaveCount(0);
     await expect(title).toBeFocused();
 
     await title.click();
     await expect(dialog).toBeVisible();
-    await page.mouse.click(5, 5);
+    // Stay inside the backdrop, clear of the desktop scrollbar gutter.
+    await page.mouse.click(25, 5);
     await expect(dialog).toHaveCount(0);
     await expect(title).toBeFocused();
     // Native keyboard activation is a normal toggle, not a hold gesture.
@@ -129,9 +158,13 @@ test('opens image-only previews on click in template details and editor without 
     await page
       .getByRole('button', { name: `Preview ${noMedia.name}`, exact: true })
       .click();
-    await expect(page.getByRole('dialog')).toContainText(
-      'No demonstration available.',
-    );
+    await expect(page.getByRole('dialog')).toContainText('Press with control.');
+    await expect(
+      page.getByRole('dialog').getByRole('img', {
+        name: `${noMedia.name} demonstration`,
+        exact: true,
+      }),
+    ).toHaveCount(0);
     await page.keyboard.press('Escape');
 
     if (suffix) {
@@ -197,28 +230,58 @@ test.describe('phone previews', () => {
       const box = (await trigger.boundingBox())!;
       await page.touchscreen.tap(box.x + box.width - 4, box.y + box.height - 4);
       await expect(dialog).toBeVisible();
-      await expect(dialog).toHaveText('');
-      await expect(dialog.getByRole('button')).toHaveCount(0);
+      await expect(dialog).toContainText('Press with control.');
+      await expect(
+        dialog.getByRole('button', { name: 'Close exercise details' }),
+      ).toBeVisible();
       const preview = (await dialog.boundingBox())!;
       expect(preview.x).toBeGreaterThanOrEqual(0);
       expect(preview.x + preview.width).toBeLessThanOrEqual(390);
       expect(preview.y).toBeGreaterThanOrEqual(0);
       expect(preview.y + preview.height).toBeLessThanOrEqual(844);
-      await dialog.getByRole('img').tap();
+      await dialog
+        .getByRole('img', {
+          name: `${exercise.name} demonstration`,
+          exact: true,
+        })
+        .tap();
       await expect(dialog).toBeVisible();
       await page.touchscreen.tap(5, 5);
       await expect(dialog).toHaveCount(0);
       await trigger.tap();
-      await page.touchscreen.tap(5, 5);
+      await dialog
+        .getByRole('button', { name: 'Close exercise details' })
+        .tap();
       await expect(dialog).toHaveCount(0);
       await expect(page.locator('.workout-active-page')).toHaveCount(0);
     }
     await page.getByRole('button', { name: /^Start .*workout$/ }).click();
     await expect(page.locator('.workout-active-page')).toBeVisible();
+    const remove = page.getByRole('button', {
+      name: `Remove ${exercise.name}`,
+      exact: true,
+    });
+    await expect(remove).toHaveCSS(
+      '-webkit-tap-highlight-color',
+      'rgba(0, 0, 0, 0)',
+    );
+    await remove.tap();
+    await expect(remove).toHaveCSS('outline-style', 'none');
+    const confirmation = page.getByRole('alertdialog');
+    const close = confirmation.getByRole('button', {
+      name: 'Close removal confirmation',
+    });
+    await expect(close).toHaveCSS(
+      '-webkit-tap-highlight-color',
+      'rgba(0, 0, 0, 0)',
+    );
+    await close.tap();
+    await expect(confirmation).toHaveCount(0);
+    await expect(page.locator('article.workout-card')).toHaveCount(2);
   });
 });
 
-test('shows workout cards below Start with muscle subheadings and image previews offline', async ({
+test('shows workout cards below Start with muscle subheadings and exercise guides offline', async ({
   page,
   request,
   context,
@@ -272,13 +335,22 @@ test('shows workout cards below Start with muscle subheadings and image previews
   const dialog = page.getByRole('dialog', { name: exercise.name, exact: true });
   await card.click();
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole('img')).toHaveAttribute('src', media.url);
-  await expect(dialog.getByRole('img')).toHaveJSProperty('naturalWidth', 1);
-  await page.mouse.click(5, 5);
+  await expect(
+    dialog.getByRole('img', {
+      name: `${exercise.name} demonstration`,
+      exact: true,
+    }),
+  ).toHaveAttribute('src', media.url);
+  await expect(
+    dialog.getByRole('img', {
+      name: `${exercise.name} demonstration`,
+      exact: true,
+    }),
+  ).toHaveJSProperty('naturalWidth', 1);
+  await expect(dialog).toContainText('Press with control.');
+  await page.mouse.click(25, 5);
   await emptyCard.click();
-  await expect(page.getByRole('dialog')).toContainText(
-    'No demonstration available.',
-  );
+  await expect(page.getByRole('dialog')).toContainText('Press with control.');
   await page.keyboard.press('Escape');
   await expect(page.locator('.workout-active-page')).toHaveCount(0);
   await page
@@ -311,11 +383,29 @@ test('shows workout cards below Start with muscle subheadings and image previews
   );
   await card.click();
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole('img')).toHaveJSProperty('naturalWidth', 1);
-  await page.mouse.click(5, 5);
+  await expect(
+    dialog.getByRole('img', {
+      name: `${exercise.name} demonstration`,
+      exact: true,
+    }),
+  ).toHaveJSProperty('naturalWidth', 1);
+  await expect(dialog).toContainText('Press with control.');
+  await page.mouse.click(25, 5);
   await expect(dialog).toHaveCount(0);
   await page.getByRole('button', { name: /^Start .*workout$/ }).click();
   await expect(page.locator('.workout-active-page')).toBeVisible();
+  await page
+    .getByRole('button', { name: `How to do ${exercise.name}`, exact: true })
+    .click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('Press with control.');
+  await expect(
+    dialog.getByRole('img', {
+      name: `${exercise.name} demonstration`,
+      exact: true,
+    }),
+  ).toHaveJSProperty('naturalWidth', 1);
+  await dialog.getByRole('button', { name: 'Close exercise details' }).click();
 });
 
 test('opens and dismisses the cached template demonstration offline', async ({
@@ -345,8 +435,14 @@ test('opens and dismisses the cached template demonstration offline', async ({
   await page.reload();
   await title.click();
   const dialog = page.getByRole('dialog', { name: exercise.name, exact: true });
-  await expect(dialog.getByRole('img')).toHaveJSProperty('naturalWidth', 1);
-  await page.mouse.click(5, 5);
+  await expect(
+    dialog.getByRole('img', {
+      name: `${exercise.name} demonstration`,
+      exact: true,
+    }),
+  ).toHaveJSProperty('naturalWidth', 1);
+  await expect(dialog).toContainText('Press with control.');
+  await page.mouse.click(25, 5);
   await expect(dialog).toHaveCount(0);
   await expect(title).toBeFocused();
 });

@@ -1,3 +1,4 @@
+import { useBackDismiss } from '../../shared/use-back-dismiss.js';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import type { Exercise, ExerciseInput, Muscle, Workout } from '@spotter/shared';
@@ -368,9 +369,24 @@ export function ExerciseDetailsModal({
   exercise: Exercise;
   onClose: () => void;
 }) {
+  useBackDismiss(onClose);
+  const closeButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const trigger = document.activeElement;
+    closeButton.current?.focus({ preventScroll: true });
+    return () => {
+      if (trigger instanceof HTMLElement && trigger.isConnected)
+        trigger.focus({ preventScroll: true });
+    };
+  }, []);
   useEffect(() => {
     function closeOnEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') onClose();
+      // The guide's only interactive element is its close button.
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        closeButton.current?.focus();
+      }
     }
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
@@ -380,7 +396,10 @@ export function ExerciseDetailsModal({
     <div
       className="modal-backdrop"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) {
+          event.preventDefault();
+          onClose();
+        }
       }}
     >
       <section
@@ -392,6 +411,7 @@ export function ExerciseDetailsModal({
         <header className="exercise-details-modal-header">
           <span className="eyebrow">EXERCISE GUIDE</span>
           <button
+            ref={closeButton}
             className="icon-button exercise-details-modal-close"
             type="button"
             aria-label="Close exercise details"

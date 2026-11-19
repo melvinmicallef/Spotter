@@ -1,6 +1,6 @@
 # Spotter Product Specification
 
-Status: Current product behavior for the `1.4.0` release. Items in "Open
+Status: Current product behavior for the `1.5.0` release. Items in "Open
 product decisions" remain unresolved.
 
 ## Purpose
@@ -32,11 +32,25 @@ be synchronized.
 - Collaborative editing or real-time multi-device workout updates.
 - Publishing a native iOS or Android application.
 
-The initial `0.1.0` release and current `1.4.0` target one trusted user per
+The initial `0.1.0` release and current `1.5.0` target one trusted user per
 deployment without built-in authentication. The server boundary keeps
 ownership and authorization concerns isolated so accounts can be added without
 rewriting the workout model. An untrusted or internet-exposed deployment
 requires an authenticating reverse proxy until that product work is completed.
+
+Toast messages disappear automatically after ten seconds unless dismissed
+earlier with their × button. Every new message, including a repeated message,
+starts a fresh ten-second timer. On phones in portrait view, toasts are centered
+horizontally near the top, with long text wrapping inside the viewport.
+
+Back follows the app screen hierarchy. From History, Muscles, Exercises,
+Templates, Settings, or stretching, Back returns to Workout regardless of the
+previously selected tab. Details and creation pages return to their list, and
+exercise/template editors return to their details page. An open guide, picker,
+confirmation, or day-swap dialog closes first. Back never confirms a destructive
+action or cancels an active workout. Direct links and reloads keep the same
+parents. At Workout with no dialog open, Back is left to the phone/browser to
+exit or leave the app; automatic window closing is platform-controlled.
 
 ## Core concepts
 
@@ -232,16 +246,19 @@ control. Creation and editing use dedicated, refresh-safe URLs.
 Deleting a weekly template requires explicit confirmation.
 
 In the template details and editor, tapping or clicking an exercise name opens
-an image-only demonstration modal. GIF demonstrations animate; PNG and JPEG
-demonstrations are also shown. The modal dismisses on an outside click or Escape.
-It has no close button, visible title, or instructional text. Preview triggers
-suppress the browser's tap highlight and pointer focus outline while retaining
-the visible keyboard focus indicator.
-Exercises without media show "No demonstration available." Native keyboard
-activation works, focus stays in the modal, and closing returns focus to the
-trigger. Exercise names suppress Android text selection and long-press menus;
-normal touch scrolling remains available. Previously cached demonstrations
-remain available in the offline details view.
+the same exercise guide modal used during an active workout. It shows the
+demonstration, preparation, execution, comments, and primary muscles, with
+the existing × close button. GIF demonstrations animate; PNG and JPEG images
+are also supported. Close it using ×, an outside click, or Escape. Exercises
+without media still show their guide text and the standard image placeholder;
+unavailable catalogue entries cannot open a guide. Keyboard focus stays on the
+close button and returns to the trigger when dismissed. Preview triggers
+suppress Android text selection, long-press menus, browser tap highlights,
+and pointer focus outlines while retaining normal touch scrolling and visible
+keyboard focus. The same tap-highlight suppression applies throughout the app,
+including removal and close buttons; buttons and links retain themed keyboard
+focus indicators. Input focus outlines and text selection stay available.
+Cached guides and demonstrations remain available offline.
 
 ### Workout tracking
 
@@ -252,10 +269,11 @@ A user can:
 - before starting, see the selected day's exercises as unnumbered cards with
   the Start/Repeat workout button above the list and the exercise name above
   a target-muscle subheading using full muscle paths. Tap or click
-  anywhere on a card to open its image-only demonstration modal, using the
-  same behavior and Android selection suppression as template previews.
-  Missing muscles or media have explicit empty messages, and cached cards
-  and demonstrations remain available offline;
+  anywhere on a card to open the same exercise guide used during a workout,
+  with the same behavior and Android selection suppression as template previews.
+  Missing muscles have an explicit empty message; exercises without media still
+  show their guide text. Cached cards, guides, and demonstrations remain available
+  offline;
 - see each weekday's optional title or its Rest label and select a day directly;
 - tap the Spotter icon on the workout home screen to reset the selected day to
   today, including rest or completed days. An in-progress workout is preserved;

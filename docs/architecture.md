@@ -81,6 +81,18 @@ localhost is suitable only when the browser is on the same development device.
 The manifest link requests same-origin credentials so an authenticating reverse
 proxy, such as Cloudflare Access, can serve the manifest after login.
 
+Global styles suppress the browser tap highlight throughout the app, including
+buttons, links, and form controls. Buttons, links, button-role elements, and
+summary controls show a themed outline on `:focus-visible` for keyboard
+navigation and suppress pointer-only focus outlines. Inputs retain their
+existing focused-field outlines and text-selection behavior.
+
+App-level toast messages dismiss automatically after ten seconds. Each message
+gets a new timeout, including repeated identical messages; replacement, manual
+dismissal, and unmount clear the prior timer. Toasts stay near the top, centered
+horizontally on portrait viewports up to 760px wide, and constrain and wrap long
+text to keep their close button within the viewport.
+
 The light/dark appearance choice is a device-only preference stored in
 `localStorage`, separate from workout and synchronization state. A small inline
 bootstrap in the HTML applies the saved theme (or the operating-system
@@ -96,9 +108,29 @@ and action availability, not local workout persistence or outbox handling.
 
 Each primary view has a stable client-side route: `/workout`, `/history`,
 `/muscles`, `/exercises`, `/templates`, `/settings`, and `/stretching`.
-Navigation writes browser history, back/forward navigation restores the
-corresponding view, and Express plus the service-worker navigation fallback
-both return the PWA shell for a direct load or refresh on those paths. The
+Navigation maintains a canonical screen hierarchy in same-document browser
+history rather than a chronological trail of visited tabs. Workout is the root;
+all main tabs and stretching return to it. Exercise/template details and creation
+return to their catalogue, editors return to details, and workout history details
+return to History. Switching tabs replaces the current branch. Explicit Back
+buttons and native Back follow these same parents, including after deep links
+and reloads. `AppNavigation` serializes asynchronous history traversal and uses
+versioned history-state frames so a reload does not add duplicate parents.
+On first adoption, browsers exposing Navigation API same-document entries also
+replace the old chronological tab trail from its first same-document entry;
+earlier documents are untouched. Older browsers establish the new hierarchy
+from the current entry and may retain pre-update entries before that root.
+Native Back at Workout is not intercepted: the browser/OS handles leaving the
+app; no script tries to close a browser window. Express and the service-worker
+navigation fallback both return the PWA shell for direct loads and refreshes.
+
+Shared guide, picker, confirmation, and day-swap dialogs register a temporary
+frame through `useBackDismiss`. Back closes the current dialog first without
+navigating away or confirming a destructive action. Closing by another control
+removes that frame; reloading a dialog restores its screen without a stale modal
+step. Navigation does not cancel or finish an active workout, or change IndexedDB
+and outbox data. Forward can revisit route screens; closed modal state is not
+reopened by Forward. The
 Today view links to the stretching poster page. Exercise creation, details,
 and editing also have stable nested routes: `/exercises/new`, `/exercises/:id`, and
 `/exercises/:id/edit`. Weekly templates follow the same list/detail/editor
@@ -250,17 +282,20 @@ Template details, the editor, and the pre-start workout screen share an
 `ExercisePreview` component. Template pages use exercise-name buttons; the
 pre-start screen uses full-card buttons with names above target-muscle summaries
 formatted through the shared muscle-path helper. Exercise order stays unchanged.
-Tapping or clicking opens a native modal `dialog`, portalled to the document
-body, containing only the image. Native keyboard activation,
-focus containment, and Escape dismissal are supported; clicking the backdrop
-also closes it and focus returns to the trigger. There is no visible heading or
-instructional text. The preview uses the existing media URL and offline media
-cache, with native GIF playback and a missing-media fallback. Selection, touch
-callouts, context menus, and browser tap highlights are suppressed on preview
-triggers only; normal touch scrolling and keyboard focus indicators remain
-available. The image-only dialog has no close button or focus outline.
-Previewing does not change the template draft
-or start a workout.
+Tapping or clicking opens the existing `ExerciseDetailsModal` from the catalogue,
+portalled to the document body. The active workout uses that same component,
+including `ExerciseInfo` for demonstrations, preparation, execution, comments,
+and primary muscles; references stay hidden. The existing × button, outside
+click, and Escape dismiss the guide. Focus stays on the close button and returns
+to the trigger on dismissal. The guide uses cached catalogue data and the
+existing media URL and offline media cache, with native GIF playback. Exercises
+without media retain their text and standard image placeholder; unavailable
+catalogue entries have disabled preview triggers. Selection, touch callouts,
+and context menus are suppressed on preview triggers only; normal touch
+scrolling remains available. Tap highlights and button focus outlines follow
+the global interaction styles.
+Previewing does not change the template draft or start a workout. The active
+workout's Add exercise button has a 12px top margin below the exercise cards.
 
 ### Exercise images
 
@@ -503,12 +538,12 @@ GitHub Actions cache without changing image contents or tags.
 
 The broad `v*` trigger is guarded by a tested strict SemVer validator before
 registry login or publication. The first release tag `v0.1.0` produced
-`0.1.0`, `0.1`, and `latest`; the current `v1.4.0` release produces `1.4.0`,
-`1.4`, and `latest`, and exposes `1.4.0` (without `v`) through `/api/version`.
+`0.1.0`, `0.1`, and `latest`; the current `v1.5.0` release produces `1.5.0`,
+`1.5`, and `latest`, and exposes `1.5.0` (without `v`) through `/api/version`.
 A prerelease such as `v0.2.0-beta.1` publishes only its exact tag. A manual run
 uses a supplied tag or a unique `sha-<commit>` tag, never moves release aliases,
 and receives a traceable application version such as
-`1.4.0+sha.0123456789ab`.
+`1.5.0+sha.0123456789ab`.
 
 ## Testing strategy
 
@@ -578,7 +613,7 @@ client serializes outbox drains, retries transient failures with bounded
 exponential backoff, and retains rejected operations for user-visible retry.
 Reference data uses the server's monotonically increasing revision cursor.
 
-The current `1.4.0` implementation uses one active workout per device, one
+The current `1.5.0` implementation uses one active workout per device, one
 active weekly ISO-day template, starts from any unfinished day with today
 selected by default, per-device current-week completion markers, strength
 repetitions plus explicit `kg`/`lb` weight, calisthenics

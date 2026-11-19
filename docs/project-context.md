@@ -18,7 +18,7 @@ The repository is public at `https://github.com/melvinmicallef/spotter`.
   management, typed and offline workouts, synchronization, PWA packaging,
   container delivery, and CI/release automation are present
 - First release: `0.1.0` (`v0.1.0`)
-- Current release: `1.4.0` (`v1.4.0`)
+- Current release: `1.5.0` (`v1.5.0`)
 - Planned image: `ghcr.io/melvinmicallef/spotter`
 - Current documents: product specification, architecture, implementation plan,
   this handoff, and repository agent instructions
@@ -122,7 +122,7 @@ workflow; a dependent job calls the publisher only after validation succeeds
 and confirms the tag still references the validated commit. Manual dispatch
 runs the same checks before publishing.
 
-The first release was `v0.1.0`; `v1.4.0` is the current release version. A stable
+The first release was `v0.1.0`; `v1.5.0` is the current release version. A stable
 semantic-version tag publishes exact, minor, and `latest`
 image tags. A prerelease such as `v0.2.0-beta.1` publishes only its exact tag.
 A manually dispatched build uses an explicit tag or a collision-safe
@@ -171,7 +171,7 @@ introduced without replacing the workout model or synchronization core.
   startup rejects unknown or altered migration histories.
 - `idb` provides the browser repository boundary. Workout and outbox changes
   share one transaction; synchronization is serialized and idempotent.
-- The current `1.4.0` product contract includes one active workout per device,
+- The current `1.5.0` product contract includes one active workout per device,
   strength/calisthenics/cardio types, ISO-weekday templates with optional named
   days and full day swaps that move exercises, targets, and names together,
   any unfinished day selectable with today as the default, device-local
@@ -219,6 +219,16 @@ all data; keep `/data` and browser site data. Older installations crossing
 `1.2.0` still apply its approved secondary-muscle cleanup. The prior `v1.3.0`
 tag remains unchanged; its offline race was corrected in `v1.3.1`.
 See [release verification](releases/1.4.0.md) for preparation/publication status.
+Release `v1.5.0` reuses the active workout exercise guide for template and
+pre-start workout previews, including its × close button and instructions,
+and adds spacing above Add exercise. Tap highlights are suppressed throughout
+the app while keyboard focus remains visible. Back follows fixed screen parents,
+with Workout at the root and dialogs closing first. Toasts dismiss after ten
+seconds and center horizontally on portrait phones. Upgrading from `1.4.0`
+preserves all data and adds no migrations or API/dependency changes. Actual app
+closing remains platform-controlled; older browsers without Navigation API
+support can retain pre-update history before the new root.
+See [1.5.0 release verification](releases/1.5.0.md) for publication status.
 Continue with the open product decisions after this release.
 
 ## Starter prompt for a new AI chat

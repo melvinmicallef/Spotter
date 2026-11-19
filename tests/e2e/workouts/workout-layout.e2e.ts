@@ -128,6 +128,19 @@ test('keeps pickers and active workout controls responsive in both themes', asyn
     if (await toggle.count()) await toggle.click();
     await page.getByRole('link', { name: 'Workout', exact: false }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    expect(
+      await page
+        .locator('button, a, input, select, textarea')
+        .evaluateAll(
+          (nodes) =>
+            nodes.filter(
+              (node) =>
+                getComputedStyle(node).getPropertyValue(
+                  '-webkit-tap-highlight-color',
+                ) !== 'rgba(0, 0, 0, 0)',
+            ).length,
+        ),
+    ).toBe(0);
     for (const width of [320, 390, 760, 1280]) {
       await page.setViewportSize({ width, height: 844 });
       for (const action of ['Cancel workout', 'Finish']) {
@@ -140,6 +153,16 @@ test('keeps pickers and active workout controls responsive in both themes', asyn
           visible: width > 760,
         });
       }
+      const addExercise = (await page
+        .getByRole('button', { name: '+ Add exercise', exact: true })
+        .boundingBox())!;
+      const lastCard = (await page
+        .locator('article.workout-card')
+        .last()
+        .boundingBox())!;
+      expect(
+        addExercise.y - (lastCard.y + lastCard.height),
+      ).toBeGreaterThanOrEqual(12);
       for (const entry of [card, secondCard]) {
         const layout = await entry.evaluate((node) => {
           const header = node
@@ -328,6 +351,19 @@ test('keeps pickers and active workout controls responsive in both themes', asyn
     name: `Remove ${first.name}`,
     exact: true,
   });
+  await remove.click();
+  await expect(remove).toHaveCSS('outline-style', 'none');
+  await removal
+    .getByRole('button', { name: 'Close removal confirmation' })
+    .click();
+  await expect(removal).toHaveCount(0);
+  await page.keyboard.press('Tab');
+  await remove.focus();
+  await expect(remove).toHaveCSS('outline-style', 'solid');
+  await page.keyboard.press('Enter');
+  await expect(removal).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(removal).toHaveCount(0);
   for (const width of [320, 1280]) {
     await page.setViewportSize({ width, height: 844 });
     for (const dismiss of ['keep', 'escape', 'close']) {

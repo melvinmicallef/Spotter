@@ -311,7 +311,7 @@ export function WorkoutView({
                         <ExercisePreview
                           className="scheduled-exercise-card"
                           name={entry.exerciseName}
-                          media={exercise?.media}
+                          exercise={exercise}
                         >
                           <strong>{entry.exerciseName}</strong>
                           <small>
