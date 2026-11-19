@@ -6,6 +6,8 @@ All notable changes to Spotter are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-19
+
 ### Added
 
 - Tap an exercise name in template details or the template editor to open an
@@ -21,6 +23,20 @@ All notable changes to Spotter are recorded here. The format follows
   below the Start workout button, with target muscles beneath the name.
   Tap anywhere on a card to open its demonstration modal, including offline
   when the media is cached.
+
+### Upgrade notes
+
+Upgrading from `1.3.1` preserves all data and adds no SQLite or IndexedDB
+migration. Keep `/data` and browser site data, including pending offline workout
+synchronization. Reopen the PWA online to receive the updated interface.
+Installations upgrading across `1.2.0` still apply its previously approved
+secondary-muscle cleanup; see the existing upgrade and backup instructions.
+
+### Known limitations
+
+The deployment remains trusted and single-user. Dependency versions are
+unchanged; the previously disclosed Zod and body-parser advisories remain
+listed under `1.3.0`.
 
 ## [1.3.1] - 2026-10-24
 
